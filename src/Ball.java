@@ -6,36 +6,20 @@ import javafx.stage.Stage;
 
 public class Ball extends Circle
 {
-	//ball size
+	public int bricksChecked = 0;
 	public static final int SIZE = 10;
-	//direction and speed of moving ball
+	
 	public static int xVel = 1; //value either 1 or -1
+
 	public static int yVel = 1;
 	public static int speed = 5;
 	
-	private Game game;
-	
-	/* Eric Buchanan
-	 * Ball
-	 * Description: constructs ball object
-	 * Parameters: double x, double y, Paddle paddle, Game thisGame
-	 * Returns nothing
-	 */
-	public Ball(double x, double y, Paddle paddle, Game thisGame) {
+	public Ball(double x, double y, Paddle paddle, Brick[][] bricks) {
 		super(x, y, SIZE);
-		//references game
-		game = thisGame;
 		reset();
-		//references paddle
-		update(paddle);
+		update(paddle, bricks);
 	}
 	
-	/* Eric Buchanan
-	 * reset
-	 * Description: resets paddle position
-	 * Parameters: none
-	 * Returns nothing
-	 */
 	private void reset() {
 		
 		//initial velocities 
@@ -43,57 +27,31 @@ public class Ball extends Circle
 		yVel = Game.sign(Math.random() * 2.0 - 1);
 	}
 	
-	/* Eric Buchanan
-	 * update
-	 * Description: updates paddle position
-	 * Parameters: Paddle paddle
-	 * Returns nothing
-	 */
-	public void update(Paddle paddle) 
+	public void update(Paddle paddle, Brick[][] bricks) 
 	{
-		//paddle and wall collision influences included in update
 		setCenterX(getCenterX() + xVel * speed);
 		setCenterY(getCenterY() + yVel * speed);
 		checkIfWall(); 
 		checkIfPaddle(paddle);
+		checkIfBrick(bricks);
 		
 	}
 	
-	/* Eric Buchanan
-	 * checkIfWall
-	 * Description: detects if ball hits wall
-	 * Parameters: none
-	 * Returns nothing
-	 */
 	public void checkIfWall() 
 	{
-		//vertical walls
 		if((getCenterX()) - SIZE <= 0 || (SIZE + getCenterX() >= Game.WIDTH))
 			{
 				changeXDir();
 			}
-		//ceiling
-		if((getCenterY()) - SIZE <= 0)
+		
+		if((getCenterY()) - SIZE <= 0 || (SIZE + getCenterY() >= Game.HEIGHT))
 			{
 				changeYDir();
 			}
-		//floor
-		if(SIZE + getCenterY() >= Game.HEIGHT) 
-		{
-			//do not bounce- end game
-			game.finish();
-		}
 	}
 	
-	/* Eric Buchanan
-	 * checkIfPaddle
-	 * Description: detects if ball hits paddle
-	 * Parameters: Paddle paddle
-	 * Returns nothing
-	 */
 	public void checkIfPaddle(Paddle paddle) 
 	{
-		//top of paddle
 		if ((getCenterX() - SIZE) >= paddle.getX() && (getCenterX() + SIZE) <= (paddle.getX() + Paddle.LENGTH) && (getCenterY() + SIZE) == paddle.getY()) 
 		{
 			changeYDir();
@@ -101,26 +59,46 @@ public class Ball extends Circle
 
 	}
 	
+	public void checkIfBrick(Brick[][] bricks) 
+	{
+		for(Brick[] brickRow : bricks){
+			for(Brick brick : brickRow) {
+				//top of brick
+				if((getCenterY() + SIZE) == brick.getY() && (getCenterX() >= brick.getX() && getCenterX() <= (brick.getX() + brick.WIDTH))) 
+				{
+					changeYDir();
+					brick.Break();
+				}
+				//bottom of brick
+				if((getCenterY() - SIZE) == (brick.getY() + brick.HEIGHT) && (getCenterX() >= brick.getX() && getCenterX() <= (brick.getX() + brick.WIDTH))) 
+				{
+					changeYDir();
+					brick.Break();
+				}
+				//left side of brick
+				if((getCenterX() + SIZE) == brick.getX() && (getCenterY() >= brick.getY() && getCenterY() <= (brick.getY() + brick.HEIGHT))) 
+				{
+					changeXDir();
+					brick.Break();
+				}
+				//right side of brick
+				if((getCenterX() - SIZE) == (brick.getX() + brick.WIDTH) && (getCenterY() >= brick.getY() && getCenterY() <= (brick.getY() + brick.HEIGHT))) 
+				{
+					changeXDir();
+					brick.Break();
+				}
+				bricksChecked ++;
+			}
+		}
+	}
 	
-	/* Eric Buchanan
-	 * changeYDir
-	 * Description: changes Y direction of ball
-	 * Parameters: none
-	 * Returns nothing
-	 */
+	
 	public static void changeYDir() {
 		yVel *= -1;
 	}
 	
-	/* Eric Buchanan
-	 * changeXDir
-	 * Description: changes X direction of ball
-	 * Parameters: none
-	 * Returns nothing
-	 */
 	public static void changeXDir() {
 		xVel *= -1;
 	}
-
 
 }
