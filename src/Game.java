@@ -1,9 +1,11 @@
 import javafx.application.Application;
 import javafx.event.Event;
+import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.scene.paint.Color;
@@ -15,7 +17,7 @@ import javafx.animation.Timeline;
 public class Game extends Application {
 
 	public static boolean running = true;
-	public final static double HEIGHT = 800;
+	public final static double HEIGHT = 1000;
 	public final static double WIDTH = 1200;
 	public static double ballX = WIDTH / 2;
 	public static double ballY = HEIGHT - 150;
@@ -30,7 +32,10 @@ public class Game extends Application {
 	private int rows = 7;
 	private int collumns = 7;
 	private int brickCount = rows * collumns;
-
+	
+	private boolean movingLeft = false;
+	private boolean movingRight = false;
+	
 	private Ball ball;
 	private Paddle paddle;
 	private Scene scene;
@@ -46,7 +51,7 @@ public class Game extends Application {
 		bricks = new Brick[collumns][rows];
 		for (int i = 0; i < collumns; i++) {
 			for (int j = 0; j < rows; j++) {
-				bricks[i][j] = new Brick(155 * j + 50, 65 * i + 20);
+				bricks[i][j] = new Brick(155 * j + 50, 65 * i + 120);
 				bricks[i][j].setFill(Color.rgb(235, 103, 52));
 			}
 		}
@@ -67,8 +72,10 @@ public class Game extends Application {
 		primaryStage.setScene(scene);
 		primaryStage.show();
 
+		movingRight = false;
+		movingLeft = false;
 		scene.setOnKeyPressed(e -> handleKeyInput(e.getCode(), root));
-
+		scene.setOnKeyReleased(event -> handleKeyRelease(event.getCode(), root));
 		double amountOfTicks = 60.0;
 		double ms = 1000 / amountOfTicks;
 		KeyFrame frame = new KeyFrame(Duration.millis(ms), this::update);
@@ -79,6 +86,12 @@ public class Game extends Application {
 	}
 
 	public void update(Event e) {
+		if(movingLeft) {
+			paddle.setX(paddle.getX() - paddle.speed);
+		}
+		else if(movingRight) {
+			paddle.setX(paddle.getX() + paddle.speed);
+		}
 		ball.update(paddle, bricks);
 		frames ++;
 	}
@@ -91,9 +104,17 @@ public class Game extends Application {
 
 	private void handleKeyInput(KeyCode code, Group root) {
 		if (code == KeyCode.RIGHT) {
-			paddle.setX(paddle.getX() + paddle.speed);
+			movingRight = true;
 		} else if (code == KeyCode.LEFT) {
-			paddle.setX(paddle.getX() - paddle.speed);
+			movingLeft = true;
+		}
+	}
+	
+	private void handleKeyRelease(KeyCode code, Group root) {
+		if (code == KeyCode.RIGHT) {
+			movingRight = false;
+		} else if (code == KeyCode.LEFT) {
+			movingLeft = false;
 		}
 	}
 

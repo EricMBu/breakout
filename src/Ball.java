@@ -9,9 +9,8 @@ public class Ball extends Circle
 	public int bricksChecked = 0;
 	public static final int SIZE = 10;
 	
-	public static int xVel = 1; //value either 1 or -1
-
-	public static int yVel = 1;
+	public static double xVel = 1; //value either 1 or -1
+	public static double yVel = 1;
 	public static int speed = 5;
 	
 	public Ball(double x, double y, Paddle paddle, Brick[][] bricks) {
@@ -34,6 +33,7 @@ public class Ball extends Circle
 		checkIfWall(); 
 		checkIfPaddle(paddle);
 		checkIfBrick(bricks);
+		double speed = (xVel * Game.sign(xVel)) + (yVel * Game.sign(yVel));
 		
 	}
 	
@@ -54,9 +54,26 @@ public class Ball extends Circle
 	{
 		if ((getCenterX() - SIZE) >= paddle.getX() && (getCenterX() + SIZE) <= (paddle.getX() + Paddle.LENGTH) && (getCenterY() + SIZE) == paddle.getY()) 
 		{
-			changeYDir();
+			bounceOffPaddle(paddle);
 		}
 
+	}
+	
+	public void bounceOffPaddle(Paddle paddle) 
+	{
+		double maxVel = 2;
+		double xPos = getCenterX();
+		double paddlePos = paddle.getX();
+		double position = getCenterX() - paddle.getX();
+		double vector = (position - (paddle.LENGTH / 2)) / (paddle.LENGTH / (maxVel * 2));
+		xVel = vector;
+		yVel = maxVel - vector;
+		if(vector < 0) {
+			yVel = maxVel + vector;
+		}
+		if(yVel > 0) {
+			changeYDir();
+		}
 	}
 	
 	public void checkIfBrick(Brick[][] bricks) 
@@ -64,25 +81,26 @@ public class Ball extends Circle
 		for(Brick[] brickRow : bricks){
 			for(Brick brick : brickRow) {
 				//top of brick
-				if((getCenterY() + SIZE) == brick.getY() && (getCenterX() >= brick.getX() && getCenterX() <= (brick.getX() + brick.WIDTH))) 
+				if((getCenterY() + SIZE) >= brick.getY() && (getCenterY() + SIZE) <= (brick.getY() + (brick.HEIGHT / 2)) && (getCenterX() >= brick.getX() && getCenterX() <= (brick.getX() + brick.WIDTH))) 
 				{
 					changeYDir();
 					brick.Break();
 				}
 				//bottom of brick
-				if((getCenterY() - SIZE) == (brick.getY() + brick.HEIGHT) && (getCenterX() >= brick.getX() && getCenterX() <= (brick.getX() + brick.WIDTH))) 
+				if((getCenterY() - SIZE) <= (brick.getY() + brick.HEIGHT) && (getCenterY() + SIZE) >= (brick.getY() + (brick.HEIGHT / 2)) && (getCenterX() >= brick.getX() && getCenterX() <= (brick.getX() + brick.WIDTH))) 
 				{
 					changeYDir();
 					brick.Break();
 				}
+				
 				//left side of brick
-				if((getCenterX() + SIZE) == brick.getX() && (getCenterY() >= brick.getY() && getCenterY() <= (brick.getY() + brick.HEIGHT))) 
+				if((getCenterX() + SIZE) <= brick.getX() && (getCenterX() + SIZE) >= (brick.getX() + brick.WIDTH / 2) && (getCenterY() >= brick.getY() && getCenterY() <= (brick.getY() + brick.HEIGHT))) 
 				{
 					changeXDir();
 					brick.Break();
 				}
 				//right side of brick
-				if((getCenterX() - SIZE) == (brick.getX() + brick.WIDTH) && (getCenterY() >= brick.getY() && getCenterY() <= (brick.getY() + brick.HEIGHT))) 
+				if((getCenterX() - SIZE) >= (brick.getX() + brick.WIDTH) && (getCenterX() - SIZE) <= (brick.getX() + brick.WIDTH / 2) && (getCenterY() >= brick.getY() && getCenterY() <= (brick.getY() + brick.HEIGHT))) 
 				{
 					changeXDir();
 					brick.Break();
