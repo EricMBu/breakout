@@ -9,6 +9,7 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.scene.paint.Color;
+import javafx.scene.text.Text;
 import javafx.util.Duration;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
@@ -33,26 +34,34 @@ public class Game extends Application {
 	private int collumns = 7;
 	private int brickCount = rows * collumns;
 	
+	private boolean paused = false;
+	private boolean ended = false;
 	private boolean movingLeft = false;
 	private boolean movingRight = false;
 	
+	private Text lblScore = new Text("score:");
 	private Ball ball;
 	private Paddle paddle;
 	private Scene scene;
 	private Brick[][] bricks;
+	private static int bricksLeft = 0;
 	
 	private int frames = 0;
 
 	@Override
-	public void start(Stage primaryStage) throws Exception {
+	public void start(Stage primaryStage) throws Exception 
+	{
 
 		paddle = new Paddle(paddleX, paddleY);
 		// brick array
 		bricks = new Brick[collumns][rows];
-		for (int i = 0; i < collumns; i++) {
-			for (int j = 0; j < rows; j++) {
+		for (int i = 0; i < collumns; i++) 
+		{
+			for (int j = 0; j < rows; j++) 
+			{
 				bricks[i][j] = new Brick(155 * j + 50, 65 * i + 120);
 				bricks[i][j].setFill(Color.rgb(235, 103, 52));
+				bricksLeft++;
 			}
 		}
 
@@ -61,8 +70,10 @@ public class Game extends Application {
 		Group root = new Group();
 		root.getChildren().addAll(ball, paddle);
 
-		for (Brick[] brickRow : bricks) {
-			for (Brick brick : brickRow) {
+		for (Brick[] brickRow : bricks) 
+		{
+			for (Brick brick : brickRow) 
+			{
 				root.getChildren().add(brick);
 			}
 		}
@@ -85,18 +96,35 @@ public class Game extends Application {
 
 	}
 
-	public void update(Event e) {
-		if(movingLeft) {
-			paddle.setX(paddle.getX() - paddle.speed);
+	public void update(Event e) 
+	{
+		if(!paused) 
+		{
+			if(movingLeft && paddle.getX() > 0) 
+			{
+				paddle.setX(paddle.getX() - paddle.speed);
+			}
+			else if(movingRight && paddle.getX() + paddle.LENGTH < WIDTH) 
+			{
+				paddle.setX(paddle.getX() + paddle.speed);
+			}
+			ball.update(paddle, bricks);
+			if(ball.getCenterY() + ball.SIZE >= HEIGHT || bricksLeft == 0) 
+			{
+				finish();
+			}
+			frames ++;
 		}
-		else if(movingRight) {
-			paddle.setX(paddle.getX() + paddle.speed);
-		}
-		ball.update(paddle, bricks);
-		frames ++;
+		
 	}
-
-	public static int sign(double d) {
+	
+	public static void breakBrick() 
+	{
+		bricksLeft--;
+	}
+	
+	public static int sign(double d) 
+	{
 		if (d <= 0)
 			return -1;
 		return 1;
@@ -107,7 +135,14 @@ public class Game extends Application {
 			movingRight = true;
 		} else if (code == KeyCode.LEFT) {
 			movingLeft = true;
+		} 
+		if(code == KeyCode.ESCAPE) {
+			paused = !paused;
 		}
+//		if(code == KeyCode.R && ended) 
+//		{
+//			start();
+//		}
 	}
 	
 	private void handleKeyRelease(KeyCode code, Group root) {
@@ -120,6 +155,7 @@ public class Game extends Application {
 
 	public void finish() {
 		animation.stop();
+		ended = true;
 	}
 
 	public static void main(String[] args) {

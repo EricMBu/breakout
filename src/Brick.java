@@ -19,5 +19,6 @@ public class Brick extends Rectangle{
 	{
 		this.setX(10000); 
 		this.setY(10000);
+		Game.breakBrick();
 	}
 }
