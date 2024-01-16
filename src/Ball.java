@@ -52,7 +52,7 @@ public class Ball extends Circle
 	
 	public void checkIfPaddle(Paddle paddle) 
 	{
-		if ((getCenterX() + SIZE) >= paddle.getX() && (getCenterX() + SIZE) <= (paddle.getX() + Paddle.LENGTH) && (getCenterY() + SIZE) >= paddle.getY()) 
+		if ((getCenterX() + SIZE) >= paddle.getX() && (getCenterX() - SIZE) <= (paddle.getX() + Paddle.LENGTH) && (getCenterY() + SIZE) >= paddle.getY()) 
 		{
 			bounceOffPaddle(paddle);
 		}
